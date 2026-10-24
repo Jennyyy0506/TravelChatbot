@@ -1,0 +1,69 @@
+:root { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #263a35; background: #f5f8f6; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; display: block; background: #f5f8f6; }
+#root { max-width: none; width: 100%; margin: 0; padding: 0; text-align: left; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+.dora-shell { min-height: 100vh; }
+.dora-topbar { display: flex; align-items: center; justify-content: space-between; min-height: 72px; padding: 14px max(24px, calc((100vw - 1200px) / 2)); border-bottom: 1px solid #dde9e2; background: #fff; }
+.dora-brand { display: flex; gap: 12px; align-items: center; font-size: 22px; font-weight: 800; color: #21493b; }
+.dora-brand small { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #739185; }
+.dora-brand-mark { display: grid; place-items: center; height: 42px; width: 42px; background: #e6f5ec; color: #2d8b62; font-size: 28px; border-radius: 14px; }
+.dora-content { margin: 0 auto; max-width: 1248px; padding: 36px 24px 80px; }
+.dora-heading { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-bottom: 26px; }
+.dora-eyebrow { letter-spacing: .16em; text-transform: uppercase; color: #4c9272; font-size: 11px; font-weight: 800; }
+.dora-heading h1 { margin: 7px 0 5px; font-size: clamp(26px, 3vw, 34px); letter-spacing: -.03em; color: #203c32; }
+.dora-heading p, .dora-toolbar p, .dora-form-head p { margin: 0; color: #6b8176; font-size: 14px; }
+.dora-pill { padding: 8px 15px; border: 1px solid #b8e0c8; background: #e7f6ed; border-radius: 999px; color: #1c7b4c; font-weight: 700; white-space: nowrap; }
+.dora-panel, .dora-form-panel { padding: 24px; background: #fff; border: 1px solid #e0eae4; border-radius: 18px; box-shadow: 0 8px 22px rgba(24,66,41,.035); }
+.dora-panel h2 { margin: 0 0 6px; font-size: 20px; color: #214436; }
+.dora-center { text-align: center; padding: 56px 24px; }
+.dora-center .dora-btn { margin-top: 14px; }
+.dora-btn { display: inline-flex; justify-content: center; align-items: center; border-radius: 10px; border: 1px solid #ccdcd1; background: white; color: #2e5743; padding: 10px 15px; font-size: 13px; font-weight: 700; min-height: 40px; transition: background .15s; }
+.dora-btn:hover { background: #f2f8f4; }
+.dora-btn:disabled { opacity: .55; cursor: not-allowed; }
+.dora-btn-primary { background: #27764f; border-color: #27764f; color: white; }
+.dora-btn-primary:hover { background: #1b6441; }
+.dora-btn-light { background: white; }
+.dora-btn-danger { color: #b33f3f; border-color: #efd0d0; }
+.dora-btn-danger:hover { background: #fff2f2; }
+.dora-btn-sm { padding: 7px 10px; min-height: 33px; }
+.dora-overview { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-bottom: 20px; }
+.dora-stat { background: #fff; padding: 20px; border: 1px solid #e0eae4; border-radius: 16px; display: flex; flex-direction: column; gap: 5px; }
+.dora-stat span, .dora-stat small { color: #70887a; font-size: 12px; }
+.dora-stat strong { font-size: 34px; color: #206341; line-height: 1.1; }
+.dora-toolbar, .dora-form-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.dora-toolbar-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.dora-form-panel { margin-bottom: 20px; border-color: #b8d9c4; }
+.dora-form-head { margin-bottom: 20px; }
+.dora-form-head h3 { margin: 0 0 4px; font-size: 20px; }
+.dora-field-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
+.dora-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.dora-field > span { font-size: 12px; font-weight: 700; color: #486351; }
+.dora-field em { color: #bd4b4b; font-style: normal; }
+.dora-field input, .dora-field textarea, .dora-search input { border: 1px solid #cfddd4; border-radius: 10px; background: #fff; color: #2c4639; padding: 11px 12px; width: 100%; outline: none; }
+.dora-field input:focus, .dora-field textarea:focus, .dora-search input:focus { border-color: #4b9d70; box-shadow: 0 0 0 3px #e0f3e6; }
+.dora-field input:disabled { color: #657970; background: #f2f5f2; }
+.dora-field-wide { grid-column: 1 / -1; }
+.dora-form-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.dora-filters { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin: 20px 0 12px; }
+.dora-search { flex: 1; max-width: 500px; }
+.dora-checkbox { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; color: #486858; font-size: 13px; }
+.dora-table-wrap { width: 100%; overflow-x: auto; }
+.dora-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+.dora-table th { padding: 13px 12px; background: #f4f8f5; color: #64806e; white-space: nowrap; font-size: 12px; }
+.dora-table td { padding: 14px 12px; vertical-align: middle; border-bottom: 1px solid #eff3f0; }
+.dora-table td strong { display: block; color: #2d4839; }
+.dora-table td small { display: block; color: #8ba095; margin-top: 4px; }
+.dora-actions { white-space: nowrap; }
+.dora-actions .dora-btn + .dora-btn { margin-left: 6px; }
+.dora-status { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 6px 9px; white-space: nowrap; color: #237a4b; background: #e9f7ee; }
+.dora-status-off { color: #9b6634; background: #fff3e3; }
+.dora-note { margin: 18px 0 0; color: #8a8873; font-size: 12px; line-height: 1.6; }
+.dora-empty { padding: 30px 12px; color: #86978e; text-align: center; }
+.dora-alert { border-radius: 10px; padding: 12px 15px; margin-bottom: 18px; font-size: 13px; }
+.dora-alert-error { color: #943939; border: 1px solid #f2c9c9; background: #fff5f4; }
+.dora-alert-success { color: #236e45; border: 1px solid #bedfc8; background: #f1fbf4; }
+.dora-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media(max-width: 760px) { .dora-content { padding: 20px 12px 50px; } .dora-topbar { padding: 10px 14px; } .dora-heading { align-items: start; } .dora-panel, .dora-form-panel { padding: 16px; } .dora-toolbar, .dora-form-head, .dora-filters { flex-direction: column; align-items: stretch; } .dora-overview { gap: 8px; } .dora-stat { padding: 13px; } .dora-stat strong { font-size: 27px; } .dora-field-grid { grid-template-columns: 1fr; } .dora-search { max-width: none; } .dora-heading h1 { font-size: 26px; } }
+@media(max-width: 460px) { .dora-heading { flex-direction: column; } .dora-overview { grid-template-columns: 1fr; } .dora-stat { padding: 11px 15px; } }
