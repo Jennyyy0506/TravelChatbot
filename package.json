@@ -1,0 +1,8 @@
+{
+  "name": "dora-local-demo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "node scripts/dev-dora.mjs"
+  }
+}
