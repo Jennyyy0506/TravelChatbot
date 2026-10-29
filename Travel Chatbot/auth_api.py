@@ -332,3 +332,7 @@ def restore_destination(
     })
     return {"message": "Đã khôi phục địa điểm", "destination_id": destination_id,
             "rag_sync_status": "pending"}
+
+# ========== DORA FIRESTORE CHAT HISTORY (v2) ==========
+from history_routes import create_history_router
+app.include_router(create_history_router(db, get_current_user))

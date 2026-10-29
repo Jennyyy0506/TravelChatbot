@@ -1,0 +1,71 @@
+.dora-demo-nav { display: flex; gap: 10px; margin: 0 0 18px; flex-wrap: wrap; }
+.dora-demo-tab { border: 1px solid #dbe7de; padding: 10px 17px; color: #476755; background: white; border-radius: 11px; font-weight: 700; }
+.dora-demo-tab[aria-current="page"] { background: #27764f; border-color: #27764f; color: white; }
+.dora-chat-layout { min-height: 550px; height: min(660px, 75vh); display: grid; grid-template-columns: 245px minmax(0, 1fr); border: 1px solid #dce9e0; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 44px rgba(30, 82, 55, .055); background: white; }
+.dora-chat-side { background: #f0f8f3; border-right: 1px solid #dce9e0; padding: 21px 16px; display: flex; flex-direction: column; min-width: 0; }
+.dora-chat-side-title { color: #246143; font-size: 20px; font-weight: 800; margin-bottom: 24px; }
+.dora-chat-new { border: 1px solid #bcdcc6; border-radius: 11px; background: white; color: #276747; padding: 12px; font-size: 13px; font-weight: 700; text-align: left; }
+.dora-chat-new:hover { background: #e2f5e9; }
+.dora-chat-side-caption { color: #8ca397; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin: 26px 0 10px; }
+.dora-chat-side-item { padding: 10px 11px; border-radius: 8px; color: #41634f; background: #e5f1e9; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dora-chat-side-foot { color: #81988a; margin-top: auto; padding-top: 25px; font-size: 11px; line-height: 1.6; }
+.dora-chat-main { display: flex; min-height: 0; flex-direction: column; min-width: 0; }
+.dora-chat-head { display: flex; align-items: center; gap: 11px; border-bottom: 1px solid #ecf1ed; padding: 17px 22px; }
+.dora-chat-avatar, .dora-chat-mini-avatar { border-radius: 13px; display: grid; place-items: center; flex-shrink: 0; color: #27764f; background: #e1f3e8; }
+.dora-chat-avatar { width: 41px; height: 41px; font-size: 25px; }
+.dora-chat-mini-avatar { width: 29px; height: 29px; font-size: 18px; }
+.dora-chat-head strong { display: block; font-size: 15px; color: #254a36; }
+.dora-chat-head span { display: block; font-size: 11px; color: #8ba195; margin-top: 2px; }
+.dora-chat-live { margin-left: auto; font-size: 11px; font-weight: 800; color: #377f56; display: flex; align-items: center; gap: 7px; }
+.dora-chat-live span { display: block; width: 7px; height: 7px; border-radius: 50%; background: #48aa78; }
+.dora-chat-thread { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+.dora-chat-welcome { margin: auto; text-align: center; max-width: 580px; width: 100%; padding: 22px 0; }
+.dora-chat-welcome-symbol { font-size: 43px; }
+.dora-chat-welcome h2 { color: #254b38; font-size: 24px; font-weight: 800; margin: 12px 0; }
+.dora-chat-welcome p { color: #759085; font-size: 14px; line-height: 1.7; }
+.dora-chat-examples { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.dora-chat-examples button { background: #f4faf6; border: 1px solid #d9e8df; border-radius: 11px; padding: 11px; font-size: 12px; color: #3c6951; max-width: 210px; text-align: left; line-height: 1.45; }
+.dora-chat-examples button:hover { background: #e3f4e9; }
+.dora-chat-message { display: flex; max-width: 85%; gap: 9px; align-items: flex-start; }
+.dora-chat-message-user { align-self: flex-end; }
+.dora-chat-message-assistant { align-self: flex-start; }
+.dora-chat-bubble { background: #f2f6f3; color: #2c4538; border-radius: 16px; padding: 13px 16px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; }
+.dora-chat-message-user .dora-chat-bubble { color: #fff; background: #27764f; border-bottom-right-radius: 5px; }
+.dora-chat-message-assistant .dora-chat-bubble { border-top-left-radius: 5px; }
+.dora-chat-thinking { color: #638372; }
+.dora-chat-compose { display: flex; align-items: end; gap: 12px; margin: 10px 22px 0; padding: 9px 10px 9px 16px; border-radius: 15px; border: 1px solid #cfded4; box-shadow: 0 4px 20px rgba(0,0,0,.025); }
+.dora-chat-compose:focus-within { border-color: #64a881; }
+.dora-chat-compose textarea { font: inherit; width: 100%; flex: 1; border: 0; outline: 0; color: #234531; resize: none; font-size: 14px; line-height: 1.5; background: transparent; min-height: 48px; }
+.dora-chat-compose button { background: #27764f; color: #fff; border: 0; border-radius: 11px; width: 44px; height: 44px; font-size: 21px; }
+.dora-chat-compose button:disabled { background: #b1c8ba; cursor: not-allowed; }
+.dora-chat-error { margin: 8px 22px; color: #a13e3e; background: #fff2f2; padding: 10px; font-size: 12px; border-radius: 9px; }
+.dora-chat-disclaimer { text-align: center; font-size: 10px; color: #a3b1a6; padding: 9px 20px 15px; }
+@media (max-width: 720px) {
+  .dora-chat-layout { grid-template-columns: 1fr; height: min(740px, 80vh); min-height: 500px; }
+  .dora-chat-side { flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; border-right: 0; border-bottom: 1px solid #dce9e0; }
+  .dora-chat-side-title { font-size: 14px; margin: 0 auto 0 0; }
+  .dora-chat-new { font-size: 11px; padding: 10px; }
+  .dora-chat-side-caption, .dora-chat-side-item, .dora-chat-side-foot { display: none; }
+  .dora-chat-thread { padding: 14px; }
+  .dora-chat-head { padding: 11px 14px; }
+  .dora-chat-compose { margin: 10px 12px 0; }
+  .dora-chat-message { max-width: 96%; }
+}
+/* Firestore-backed conversation list */
+.dora-chat-history-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.dora-chat-history-row { display: flex; align-items: center; gap: 4px; }
+.dora-chat-history-open { flex: 1; min-width: 0; width: 100%; border: 0; cursor: pointer; text-align: left; }
+.dora-chat-history-open.is-active { background: #d8efe0; font-weight: 700; }
+.dora-chat-history-delete { flex: 0 0 25px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #a04a4a; font-size: 23px; cursor: pointer; }
+.dora-chat-history-delete:hover { background: #ffe3e3; }
+.dora-chat-history-delete:disabled { opacity: .35; cursor: not-allowed; }
+.dora-chat-side-item:disabled { cursor: wait; }
+.dora-chat-loading { margin: auto; color: #668875; font-size: 13px; }
+@media (max-width: 720px) {
+  .dora-chat-layout { grid-template-rows: auto minmax(0, 1fr); }
+  .dora-chat-side { display: flex; flex-wrap: wrap; }
+  .dora-chat-side-caption { display: block; margin: 0; font-size: 10px; }
+  .dora-chat-history-list { flex-direction: row; flex: 1 1 100%; overflow-x: auto; gap: 6px; }
+  .dora-chat-history-row { flex: 0 0 auto; max-width: 170px; }
+  .dora-chat-history-open { max-width: 135px; }
+}

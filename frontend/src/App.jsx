@@ -7,8 +7,9 @@ import {
 } from "firebase/auth";
 import { auth } from "./firebase";
 import "./App.css";
+import ChatPage from "./ChatPage";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = "/api";
 
 const FIELDS = [
   { key: "destination_id", label: "Mã địa điểm", required: true },
@@ -153,6 +154,7 @@ function App() {
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState("");
+  const [activePage, setActivePage] = useState("chat");
 
   useEffect(() => {
     let requestId = 0;
@@ -297,11 +299,17 @@ function App() {
 
       <main className="dora-content">
         <div className="dora-heading">
-          <div><div className="dora-eyebrow">DORA / FIREBASE</div><h1>Quản lý địa điểm du lịch</h1>
-            <p>Kiểm thử CRUD trên Firestore — giao diện quản trị tạm thời.</p></div>
+          <div><div className="dora-eyebrow">DORA / {activePage === "chat" && profile ? "AI ASSISTANT" : "FIREBASE"}</div><h1>{activePage === "chat" && profile ? "Trợ lý du lịch Dora" : "Quản lý địa điểm du lịch"}</h1>
+            <p>{activePage === "chat" && profile ? "Hỏi Dora về các địa điểm du lịch Việt Nam." : "Kiểm thử CRUD trên Firestore — giao diện quản trị tạm thời."}</p></div>
           {profile && <span className="dora-pill">{profile.role === "admin" ? "✦ Admin" : "User"}</span>}
         </div>
 
+        {profile && (
+          <nav className="dora-demo-nav" aria-label="Điều hướng Dora">
+            <button type="button" className="dora-demo-tab" aria-current={activePage === "chat" ? "page" : undefined} onClick={() => setActivePage("chat")}>💬 Chat Dora</button>
+            {profile.role === "admin" && <button type="button" className="dora-demo-tab" aria-current={activePage === "admin" ? "page" : undefined} onClick={() => setActivePage("admin")}>🗂️ Quản lý địa điểm</button>}
+          </nav>
+        )}
         {error && <div className="dora-alert dora-alert-error" role="alert">{error}</div>}
         {notice && <div className="dora-alert dora-alert-success" role="status">{notice}</div>}
 
@@ -314,12 +322,13 @@ function App() {
         {!authLoading && user && !profile && (
           <section className="dora-panel"><p>Đã đăng nhập Google nhưng chưa tải được hồ sơ Firestore. Kiểm tra backend tại localhost:8000.</p></section>
         )}
-        {!authLoading && profile?.role !== "admin" && profile && (
+        {!authLoading && profile?.role !== "admin" && profile && activePage === "admin" && (
           <section className="dora-panel dora-center"><h2>Xin chào, {profile.display_name || "bạn"}!</h2>
             <p>Tài khoản của bạn có quyền <strong>user</strong>. Chức năng quản lý địa điểm chỉ dành cho Admin.</p></section>
         )}
 
-        {!authLoading && profile?.role === "admin" && (
+        {!authLoading && profile && activePage === "chat" && <ChatPage onRequest={request} />}
+        {!authLoading && profile?.role === "admin" && activePage === "admin" && (
           <>
             <section className="dora-overview">
               <div className="dora-stat"><span>Tổng bản ghi đã tải</span><strong>{places.length}</strong><small>Firestore · destinations</small></div>
