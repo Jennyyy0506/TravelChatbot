@@ -1,21 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GoogleAuthProvider,
-  createUserWithEmailAndPassword,
   onAuthStateChanged,
-  signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  updateProfile,
 } from "firebase/auth";
 import { auth } from "./firebase";
 import "./App.css";
 import ChatPage from "./ChatPage";
-import HomePage from "./HomePage";
-import AuthPage from "./AuthPage";
-import "./Site.css";
-
-const SettingsPage = lazy(() => import("./SettingsPage"));
 
 const API_BASE = "/api";
 
@@ -76,25 +68,6 @@ function extractError(body, fallback) {
     return body.detail.map((e) => e.msg).join("; ");
   }
   return fallback;
-}
-
-function authErrorMessage(error) {
-  const messages = {
-    "auth/email-already-in-use": "Email này đã được sử dụng. Bạn có thể chuyển sang Đăng nhập.",
-    "auth/invalid-email": "Địa chỉ email chưa đúng. Vui lòng kiểm tra lại.",
-    "auth/weak-password": "Mật khẩu chưa đủ mạnh. Hãy dùng ít nhất 8 ký tự, kết hợp chữ, số và ký tự đặc biệt.",
-    "auth/password-does-not-meet-requirements": "Mật khẩu chưa đáp ứng yêu cầu. Hãy kết hợp chữ hoa, chữ thường, số và ký tự đặc biệt.",
-    "auth/invalid-credential": "Email hoặc mật khẩu chưa đúng. Vui lòng thử lại.",
-    "auth/wrong-password": "Email hoặc mật khẩu chưa đúng. Vui lòng thử lại.",
-    "auth/user-not-found": "Email hoặc mật khẩu chưa đúng. Vui lòng thử lại.",
-    "auth/user-disabled": "Tài khoản này đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên.",
-    "auth/too-many-requests": "Có quá nhiều lần thử. Vui lòng đợi một lúc rồi thử lại.",
-    "auth/network-request-failed": "Không kết nối được với dịch vụ đăng nhập. Vui lòng kiểm tra mạng rồi thử lại.",
-    "auth/operation-not-allowed": "Phương thức này chưa được bật. Vui lòng liên hệ quản trị viên để bật đăng nhập bằng email và mật khẩu.",
-    "auth/popup-blocked": "Trình duyệt đang chặn cửa sổ Google. Hãy cho phép cửa sổ bật lên rồi thử lại.",
-    "auth/unauthorized-domain": "Địa chỉ trang web này chưa được cho phép đăng nhập. Vui lòng liên hệ quản trị viên.",
-  };
-  return messages[error.code] || "Chưa hoàn tất được yêu cầu. Vui lòng thử lại sau.";
 }
 
 async function request(path, { method = "GET", data } = {}) {
@@ -181,48 +154,40 @@ function App() {
   const [form, setForm] = useState(blankForm);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState("");
-  const [activePage, setActivePage] = useState("home");
-  const [seedPrompt, setSeedPrompt] = useState("");
-  const [loggingIn, setLoggingIn] = useState(false);
-  const [authInfo, setAuthInfo] = useState("");
-  const chatRef = useRef(null);  const profileVersion = useRef(0);
-  const registrationPending = useRef(false);
-  const authPending = useRef(false);
-
-  const loadProfile = useCallback(async (currentUser) => {
-    const currentRequestId = ++profileVersion.current;
-    setUser(currentUser);
-    setProfile(null);
-    setPlaces([]);
-    setLoaded(false);
-    setError("");
-    setAuthLoading(true);
-    if (!currentUser) {
-      setAuthLoading(false);
-      return;
-    }
-    if (registrationPending.current) return;
-    try {
-      const data = await request("/auth/sync", { method: "POST" });
-      if (currentRequestId === profileVersion.current) setProfile(data);
-    } catch (err) {
-      if (currentRequestId === profileVersion.current) setError(`Không tải được hồ sơ: ${err.message}`);
-    } finally {
-      if (currentRequestId === profileVersion.current) setAuthLoading(false);
-    }
-  }, []);
+  const [activePage, setActivePage] = useState("chat");
 
   useEffect(() => {
+    let requestId = 0;
     const unsubscribe = onAuthStateChanged(
       auth,
-      loadProfile,
+      async (currentUser) => {
+        const currentRequestId = ++requestId;
+        setUser(currentUser);
+        setProfile(null);
+        setPlaces([]);
+        setLoaded(false);
+        setError("");
+        setAuthLoading(true);
+        if (!currentUser) {
+          setAuthLoading(false);
+          return;
+        }
+        try {
+          const data = await request("/auth/sync", { method: "POST" });
+          if (currentRequestId === requestId) setProfile(data);
+        } catch (err) {
+          if (currentRequestId === requestId) setError(`Không đồng bộ được hồ sơ: ${err.message}`);
+        } finally {
+          if (currentRequestId === requestId) setAuthLoading(false);
+        }
+      },
       (err) => {
         setError(err.message);
         setAuthLoading(false);
       }
     );
-    return () => { profileVersion.current += 1; unsubscribe(); };
-  }, [loadProfile]);
+    return () => { requestId += 1; unsubscribe(); };
+  }, []);
 
   const loadPlaces = useCallback(async () => {
     setListLoading(true);
@@ -247,6 +212,10 @@ function App() {
       setListLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (profile?.role === "admin") loadPlaces();
+  }, [profile?.role, loadPlaces]);
 
   const filteredPlaces = useMemo(() => {
     const keyword = normalize(search.trim());
@@ -279,8 +248,7 @@ function App() {
         setNotice("Đã thêm địa điểm vào Firestore. ChromaDB đang chờ đồng bộ.");
       } else {
         const id = form.destination_id;
-        const updates = { ...data };
-        delete updates.destination_id;
+        const { destination_id, ...updates } = data;
         await request(`/admin/destinations/${encodeURIComponent(id)}`, { method: "PATCH", data: updates });
         setNotice("Đã lưu thay đổi vào Firestore. ChromaDB đang chờ đồng bộ.");
       }
@@ -312,148 +280,54 @@ function App() {
   };
 
   const login = async () => {
-    if (authPending.current) return;
-    authPending.current = true;
     setError("");
-    setAuthInfo("");
-    setLoggingIn(true);
-    try {
-      await signInWithPopup(auth, new GoogleAuthProvider());      setActivePage("chat");
-    } catch (err) {
-      if (err.code === "auth/popup-closed-by-user" || err.code === "auth/cancelled-popup-request") {
-        setAuthInfo("Cửa sổ Google đã đóng trước khi hoàn tất. Bạn có thể thử lại hoặc đăng nhập bằng email.");
-      } else setError(authErrorMessage(err));
-    }
-    finally { authPending.current = false; setLoggingIn(false); }
-  };
-
-  const register = async ({ name, email, password }) => {
-    if (authPending.current) return;
-    authPending.current = true;
-    registrationPending.current = true;
-    setLoggingIn(true);
-    setError("");
-    setAuthInfo("");
-    let registeredUser = null;
-    try {
-      const result = await createUserWithEmailAndPassword(auth, email, password);
-      registeredUser = result.user;
-      await updateProfile(registeredUser, { displayName: name });
-      await registeredUser.getIdToken(true);
-      registrationPending.current = false;
-      await loadProfile(registeredUser);
-      setActivePage("chat");
-    } catch (err) {
-      registrationPending.current = false;
-      if (registeredUser) {
-        await loadProfile(registeredUser);
-        setError((previous) => [previous, "Tài khoản đã được tạo, nhưng chưa cập nhật được họ tên. Bạn không cần đăng ký lại."].filter(Boolean).join(" "));
-        setActivePage("chat");
-      } else setError(authErrorMessage(err));
-    } finally {
-      registrationPending.current = false;
-      authPending.current = false;
-      setLoggingIn(false);
-    }
-  };
-
-  const loginWithEmail = async ({ email, password }) => {
-    if (authPending.current) return;
-    authPending.current = true;
-    setLoggingIn(true);
-    setError("");
-    setAuthInfo("");
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setActivePage("chat");
-    } catch (err) { setError(authErrorMessage(err)); }
-    finally { authPending.current = false; setLoggingIn(false); }
-  };
-
-  const openAuth = (page) => {
-    if (authPending.current) return;
-    setError("");
-    setAuthInfo("");
-    setActivePage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch (err) { setError(err.message); }
   };
   const logout = async () => {
     setError("");
-    try {
-      await signOut(auth);      setActivePage("home");
-    }
+    try { await signOut(auth); }
     catch (err) { setError(err.message); }
   };
 
-  const openSettings = () => {
-    setError("");
-    setAuthInfo("");
-    setActivePage("settings");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-  const updateAccount = async (values) => {
-    const currentUser = auth.currentUser;
-    if (!currentUser || currentUser.uid !== user?.uid) throw new Error("Vui lòng đăng nhập lại.");
-    try {
-      const { saveAccount } = await import("./accountData");
-      const saved = await saveAccount(currentUser, values);
-      if (auth.currentUser?.uid === currentUser.uid) setProfile((old) => old ? { ...old, ...saved } : old);
-      return saved;
-    } finally {
-      if (auth.currentUser?.uid === currentUser.uid) setProfile((old) => old ? { ...old, display_name: currentUser.displayName || old.display_name } : old);
-    }
-  };
-
-  const startChat = (prompt = "") => {
-    setSeedPrompt(prompt);
-    chatRef.current?.newChat(prompt);
-    setActivePage("chat");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-  const displayName = user?.displayName || profile?.display_name || "Bạn";
-  const initials = displayName.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]).join("").toUpperCase();
-  const isAuthPage = activePage === "register" || activePage === "login";
-
   return (
     <div className="dora-shell">
-      <header className={`dora-topbar ${isAuthPage ? "is-auth" : ""}`}>
-        <div className="dora-topbar-inner">
-          <button className="dora-brand" onClick={() => setActivePage("home")} aria-label="Dora — Trang chủ"><span className="dora-brand-mark">D</span><span>Dora</span></button>
-          {isAuthPage ? <button className="dora-auth-back" disabled={loggingIn} onClick={() => openAuth("home")}>← Về trang chủ</button> : <><nav className="dora-navigation" aria-label="Điều hướng chính">
-            <button aria-current={activePage === "home" ? "page" : undefined} onClick={() => setActivePage("home")}>Trang chủ</button>
-            <button aria-current={activePage === "chat" ? "page" : undefined} onClick={() => setActivePage("chat")}>Trò chuyện</button>
-            <button aria-current={activePage === "settings" ? "page" : undefined} onClick={openSettings}>Cài đặt</button>
-          </nav>
-          <div className="dora-header-actions">
-            {user ? <><button className="dora-btn dora-btn-light dora-new-chat" disabled={loggingIn || authLoading} onClick={() => startChat()}>+ Trò chuyện mới</button><button className="dora-account" onClick={openSettings} aria-label={`Tài khoản ${displayName}`}>{initials}</button></> : <><button className="dora-btn dora-btn-light" disabled={loggingIn || authLoading} onClick={() => openAuth("login")}>Đăng nhập</button><button className="dora-btn dora-btn-warm" disabled={loggingIn || authLoading} onClick={() => openAuth("register")}>Đăng ký</button></>}
-          </div></>}
-        </div>
+      <header className="dora-topbar">
+        <div className="dora-brand"><span className="dora-brand-mark">✿</span><span>Dora <small>Travel Chatbot</small></span></div>
+        {user && <button type="button" onClick={logout} className="dora-btn dora-btn-light">Đăng xuất</button>}
       </header>
 
-      {error && !isAuthPage && <div className="dora-global-alert dora-alert dora-alert-error" role="alert">{error}</div>}
-      {authInfo && !isAuthPage && <div className="dora-global-alert dora-alert" role="status">{authInfo}</div>}
-      {activePage === "home" && <HomePage onStart={startChat} onLogin={() => openAuth("register")} signedIn={!!user} />}
-      {isAuthPage && <AuthPage key={activePage} mode={activePage} busy={loggingIn || authLoading} error={error} info={authInfo} onSubmit={activePage === "register" ? register : loginWithEmail} onGoogleLogin={login} onSwitch={() => openAuth(activePage === "register" ? "login" : "register")} />}
-      {activePage === "settings" && <Suspense fallback={<div className="dora-content" role="status">Đang mở cài đặt…</div>}><SettingsPage key={user?.uid || "guest"} user={user} profile={profile} onUpdateProfile={updateAccount} onLogin={() => openAuth("login")} onLogout={logout} onOpenAdmin={() => { setActivePage("admin"); if (!loaded) loadPlaces(); }} /></Suspense>}
-      <main className={`dora-content ${activePage === "chat" && profile ? "dora-content-chat" : ""}`} hidden={activePage === "home" || isAuthPage || activePage === "settings"}>
-        {activePage === "admin" && <div className="dora-heading"><div><p className="dora-eyebrow">DORA / QUẢN TRỊ</p><h1>Quản lý địa điểm du lịch</h1><p>Cập nhật thông tin cho những hành trình mới.</p></div><button className="dora-btn dora-btn-light" onClick={() => setActivePage("chat")}>Quay lại trò chuyện</button></div>}
-        {notice && activePage === "admin" && <div className="dora-alert dora-alert-success" role="status">{notice}</div>}
+      <main className="dora-content">
+        <div className="dora-heading">
+          <div><div className="dora-eyebrow">DORA / {activePage === "chat" && profile ? "AI ASSISTANT" : "FIREBASE"}</div><h1>{activePage === "chat" && profile ? "Trợ lý du lịch Dora" : "Quản lý địa điểm du lịch"}</h1>
+            <p>{activePage === "chat" && profile ? "Hỏi Dora về các địa điểm du lịch Việt Nam." : "Kiểm thử CRUD trên Firestore — giao diện quản trị tạm thời."}</p></div>
+          {profile && <span className="dora-pill">{profile.role === "admin" ? "✦ Admin" : "User"}</span>}
+        </div>
 
-        {authLoading && <section className="dora-panel"><p>Đang kiểm tra và đồng bộ tài khoản…</p></section>}
+        {profile && (
+          <nav className="dora-demo-nav" aria-label="Điều hướng Dora">
+            <button type="button" className="dora-demo-tab" aria-current={activePage === "chat" ? "page" : undefined} onClick={() => setActivePage("chat")}>💬 Chat Dora</button>
+            {profile.role === "admin" && <button type="button" className="dora-demo-tab" aria-current={activePage === "admin" ? "page" : undefined} onClick={() => setActivePage("admin")}>🗂️ Quản lý địa điểm</button>}
+          </nav>
+        )}
+        {error && <div className="dora-alert dora-alert-error" role="alert">{error}</div>}
+        {notice && <div className="dora-alert dora-alert-success" role="status">{notice}</div>}
+
+        {authLoading && <section className="dora-panel"><p>Đang kiểm tra và đồng bộ tài khoản Google...</p></section>}
         {!authLoading && !user && (
-          <section className="dora-panel dora-center dora-login-panel"><span className="dora-login-mark">D</span><p className="dora-eyebrow">CHÀO MỪNG ĐẾN VỚI DORA</p><h1>Mỗi chuyến đi, một câu chuyện.</h1>
-            <p>Đăng nhập để cùng Dora khám phá và lưu lại hành trình của bạn.</p>
-            <button className="dora-btn dora-btn-primary" disabled={loggingIn} onClick={login}>{loggingIn ? "Đang đăng nhập…" : "Tiếp tục với Google"}</button></section>
+          <section className="dora-panel dora-center"><h2>Chào mừng đến với Dora 🌸</h2>
+            <p>Đăng nhập Google để tiếp tục.</p>
+            <button className="dora-btn dora-btn-primary" onClick={login}>Đăng nhập bằng Google</button></section>
         )}
         {!authLoading && user && !profile && (
-          <section className="dora-panel"><p>Bạn đã đăng nhập nhưng chưa tải được hồ sơ. Kiểm tra kết nối rồi thử lại.</p><button className="dora-btn dora-btn-primary" onClick={() => loadProfile(auth.currentUser)}>Thử tải lại hồ sơ</button></section>
+          <section className="dora-panel"><p>Đã đăng nhập Google nhưng chưa tải được hồ sơ Firestore. Kiểm tra backend tại localhost:8000.</p></section>
         )}
         {!authLoading && profile?.role !== "admin" && profile && activePage === "admin" && (
           <section className="dora-panel dora-center"><h2>Xin chào, {profile.display_name || "bạn"}!</h2>
             <p>Tài khoản của bạn có quyền <strong>user</strong>. Chức năng quản lý địa điểm chỉ dành cho Admin.</p></section>
         )}
 
-        {!authLoading && profile && <div hidden={activePage !== "chat"}><ChatPage key={user.uid} ref={chatRef} onRequest={request} initialQuestion={seedPrompt} /></div>}
+        {!authLoading && profile && activePage === "chat" && <ChatPage onRequest={request} />}
         {!authLoading && profile?.role === "admin" && activePage === "admin" && (
           <>
             <section className="dora-overview">
@@ -507,7 +381,6 @@ function App() {
           </>
         )}
       </main>
-
     </div>
   );
 }
